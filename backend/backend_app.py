@@ -34,7 +34,6 @@ def add_post():
 
 
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
-@app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
     data = request.get_json()
     title = data.get('title')
@@ -52,7 +51,6 @@ def update_post(post_id):
     return jsonify(post)
 
 
-
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
     post = next((p for p in POSTS if p['id'] == post_id), None)
@@ -61,6 +59,26 @@ def delete_post(post_id):
         return jsonify({"message": f"Post with id {post_id} has been deleted successfully."})
     else:
         abort(404, f"Post with id {post_id} not found.")
+
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    title = request.args.get('title')
+    content = request.args.get('content')
+
+    if not title and not content:
+        return jsonify({"error": "At least one of 'title' or 'content' query parameters is required."}), 400
+
+    matched_posts = []
+    for post in POSTS:
+        if title:
+            if title.lower() in post['title'].lower():
+                matched_posts.append(post)
+        elif content:
+            if content.lower() in post['content'].lower():
+                matched_posts.append(post)
+
+    return jsonify(matched_posts)
 
 
 @app.errorhandler(400)

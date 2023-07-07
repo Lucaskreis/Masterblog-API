@@ -12,7 +12,21 @@ POSTS = [
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS)
+    sort = request.args.get('sort')
+    direction = request.args.get('direction')
+
+    if sort not in ['title', 'content']:
+        return jsonify({"error": "Invalid value for 'sort' parameter. Allowed values are 'title' or 'content'."}), 400
+
+    if direction not in ['asc', 'desc']:
+        return jsonify({"error": "Invalid value for 'direction' parameter. Allowed values are 'asc' or 'desc'."}), 400
+
+    if sort:
+        sorted_posts = sorted(POSTS, key=lambda p: p[sort], reverse=(direction == 'desc'))
+    else:
+        sorted_posts = POSTS
+
+    return jsonify(sorted_posts)
 
 
 @app.route('/api/posts', methods=['POST'])
